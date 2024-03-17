@@ -146,7 +146,7 @@ class AuthController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function register(Request $request) {
-        Log::info("forgotPassword API");
+        Log::info("Register API");
         Log::info(print_r($request->all(), true));
         $request->email = strtolower($request->email);
         $validator = Validator::make($request->all(), [
@@ -166,42 +166,19 @@ class AuthController extends Controller
             'password.confirmed' => 'The passwords do not match',
             'password.min' => 'Password must contain six or more characters',
         ]);
+        
         if($validator->fails()){
             return response()->json($validator->errors()->toJson(), 400);
         }
+
         $user = User::create(array_merge(
                     $validator->validated(),
                     ['password' => bcrypt($request->password)]
                 ));
-        // event(new Registered($user));
+
         Log::info(print_r($user, true));
-        // $url = URL::temporarySignedRoute(
-        //     'verification.verify',
-        //     Carbon::now()->addMinutes(Config::get('auth.verification.expire', 60)),
-        //     [
-        //         'id' => $user->getKey(),
-        //         'hash' => sha1($user->getEmailForVerification()),
-        //     ]
-        // );
-
-        $url = URL::temporarySignedRoute(
-            'verification.verify',
-            Carbon::now()->addMinutes(Config::get('auth.verification.expire', 60)),
-            [
-                'id' => $user->getKey(),
-                'hash' => sha1($user->getEmailForVerification()),
-            ]
-        );
          
-        $verifyEmailLink =  \config('frontend.url')."auth/verify?url=".$url;
-        //$verifyEmailLink = "https://meetmentees-staging.vercel.app/auth/verify?url=".$url; //temporary fix to unblock frontend
-        Log::info("email Verification url ". $verifyEmailLink);
-        Mail::send('emails.emailVerificationEmail', ['url' => $verifyEmailLink, 'user' => $user], function($message) use($user){
-              $message->to($user->email);
-              $message->subject('Verify Email Address');
-        });
-
-        Log::info("User Registration end ");
+        $user->markEmailAsVerified();
         return response()->json([
             'message' => 'User successfully registered',
             'user' => $user
