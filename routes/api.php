@@ -23,22 +23,22 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 /* Authentication Routes */
-Route::group([ 'prefix' => '/v1/auth' ], function ($router) {
+Route::group(['prefix' => '/v1/auth'], function ($router) {
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/check-email-exists', [AuthController::class, 'checkEmailExists']);
-    Route::group([ 'middleware' =>['jwt.verify']], function ($router) {
+    Route::group(['middleware' => ['jwt.verify']], function ($router) {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/refresh', [AuthController::class, 'refresh']);
-        Route::get('/user-profile', [AuthController::class, 'userProfile']);    
+        Route::get('/user-profile', [AuthController::class, 'userProfile']);
     });
 });
 /* Authentication Routes End */
 
 /* Product Routes */
-Route::group([ 'prefix' => '/v1/products' ], function ($router) {
+Route::group(['prefix' => '/v1/products'], function ($router) {
     Route::get('/all', [ProductController::class, 'getProducts']);
     Route::get('', [ProductController::class, 'getPaginatedProducts']);
     Route::get('/{id}', [ProductController::class, 'getProductById']);
@@ -49,7 +49,11 @@ Route::group([ 'prefix' => '/v1/products' ], function ($router) {
 /* Product Routes End */
 
 /* Product Category Routes */
-Route::group([ 'prefix' => '/v1/categories' ], function ($router) {
+Route::group(['prefix' => '/v1/categories'], function ($router) {
     Route::get('/all', [ProductCategoryController::class, 'getCategories']);
 });
 /* Product Category Routes End */
+
+/* Order Routes */
+Route::post('/v1/orders', 'App\Http\Controllers\OrderController@orderProduct');
+/* Order Routes End */
